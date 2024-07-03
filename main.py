@@ -16,9 +16,10 @@ df['Sales'] = df['Quantity Ordered'] * df['Price Each']
 # Step 3: Data analysis
 
 # Monthly sales analysis
-monthly_sales = df.groupby('Month')['Sales'].sum()
+monthly_sales = df.groupby('Month')['Sales'].sum().reset_index()
 plt.figure(figsize=(10, 6))
-sns.barplot(x=monthly_sales.index, y=monthly_sales.values, palette='viridis')
+sns.barplot(x='Month', y='Sales', data=monthly_sales, palette='viridis', hue='Month', dodge=False)
+plt.legend([],[], frameon=False)  # Remove legend
 plt.title('Monthly Sales')
 plt.xlabel('Month')
 plt.ylabel('Sales ($)')
@@ -27,9 +28,9 @@ plt.show()
 
 # Hourly sales analysis
 df['Hour'] = df['Order Date'].dt.hour
-hourly_sales = df.groupby('Hour')['Sales'].sum()
+hourly_sales = df.groupby('Hour')['Sales'].sum().reset_index()
 plt.figure(figsize=(10, 6))
-sns.lineplot(x=hourly_sales.index, y=hourly_sales.values, marker='o', linestyle='-', color='b')
+sns.lineplot(x='Hour', y='Sales', data=hourly_sales, marker='o', linestyle='-', color='b')
 plt.title('Hourly Sales')
 plt.xlabel('Hour')
 plt.ylabel('Sales ($)')
@@ -38,9 +39,11 @@ plt.grid(True)
 plt.show()
 
 # Top products sold
-top_products = df['Product'].value_counts().head(10)
+top_products = df['Product'].value_counts().head(10).reset_index()
+top_products.columns = ['Product', 'Orders']
 plt.figure(figsize=(10, 6))
-sns.barplot(x=top_products.index, y=top_products.values, palette='coolwarm')
+sns.barplot(x='Product', y='Orders', data=top_products, palette='coolwarm', hue='Product', dodge=False)
+plt.legend([],[], frameon=False)  # Remove legend
 plt.title('Top 10 Products Sold')
 plt.xlabel('Product')
 plt.ylabel('Number of Orders')
@@ -50,21 +53,21 @@ plt.show()
 # Step 4: Insights and conclusion
 
 # Monthly sales insights
-max_month = monthly_sales.idxmax()
-max_sales = monthly_sales[max_month]
-min_month = monthly_sales.idxmin()
-min_sales = monthly_sales[min_month]
+max_month = monthly_sales.loc[monthly_sales['Sales'].idxmax(), 'Month']
+max_sales = monthly_sales['Sales'].max()
+min_month = monthly_sales.loc[monthly_sales['Sales'].idxmin(), 'Month']
+min_sales = monthly_sales['Sales'].min()
 print(f"Highest sales occur in {max_month} with ${max_sales:,.0f}")
 print(f"Lowest sales occur in {min_month} with ${min_sales:,.0f}")
 
 # Hourly sales insights
-peak_hour = hourly_sales.idxmax()
-peak_sales = hourly_sales[peak_hour]
+peak_hour = hourly_sales.loc[hourly_sales['Sales'].idxmax(), 'Hour']
+peak_sales = hourly_sales['Sales'].max()
 print(f"The peak sales hour is around {peak_hour}:00 with ${peak_sales:,.0f} in sales")
 
 # Top products insights
-top_product = top_products.idxmax()
-top_product_orders = top_products.max()
+top_product = top_products.loc[top_products['Orders'].idxmax(), 'Product']
+top_product_orders = top_products['Orders'].max()
 print(f"The top selling product is '{top_product}' with {top_product_orders} orders")
 
 # Additional insights and recommendations based on findings
@@ -74,12 +77,11 @@ print("- Explore opportunities to promote and bundle the top selling products.")
 
 # Conclusion
 print("\nConclusion:")
-print("- The analysis reveals strong seasonal trends, with December exhibiting the highest sales.")
-print("- Certain hours of the day see significantly higher sales volumes, suggesting potential for targeted promotions.")
-print("- Product '{top_product}' consistently performs well and should be a focal point for inventory management and marketing strategies.")
+print(f"- The analysis reveals strong seasonal trends, with {max_month} exhibiting the highest sales.")
+print(f"- Certain hours of the day see significantly higher sales volumes, suggesting potential for targeted promotions.")
+print(f"- Product '{top_product}' consistently performs well and should be a focal point for inventory management and marketing strategies.")
 
 # Example actions based on insights
 print("\nRecommendations:")
 print("- Implement targeted marketing campaigns during peak sales periods and for top-selling products.")
 print("- Optimize inventory levels for high-demand products based on monthly and hourly trends.")
-
